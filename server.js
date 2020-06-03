@@ -6,10 +6,13 @@ if (process.env.NODE_ENV !== "production") require("dotenv").config();
 
 const express = require("express");
 const app = express();
-
+const bodyParser = require("body-parser");
 const expressLayout = require("express-ejs-layouts");
 
+// routes
 const indexRouter = require("./routes/index");
+const authorRouter = require("./routes/authors");
+
 
 app.set("view engine", "ejs");
 // point to the location where all the views are loacted
@@ -19,14 +22,18 @@ app.set("layout", "layouts/layout")
 app.use(expressLayout)
 app.use(express.static("public"));
 
-// use the root route
+// body parser
+app.use(bodyParser.urlencoded({limit:"10mb", extended:false}));
+
+// use routes
 app.use("/", indexRouter);
+app.use("/authors", authorRouter);
 
 // setup mongodb
 const mongoose = require("mongoose");
 mongoose.connect(process.env.DATABASE_URL, {useNewUrlParser:true, useUnifiedTopology:true});
 const db = mongoose.connection;
 db.on("error", err => console.log(err));
-db.once("open", () => console.log("Connected to mogoose")); // connection for the first time
+db.once("open", () => console.log("Connected to mongoose")); // connection for the first time
 
 app.listen(process.env.PORT || 3000);
