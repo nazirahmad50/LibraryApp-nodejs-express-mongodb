@@ -12,6 +12,8 @@ const expressLayout = require("express-ejs-layouts");
 // routes
 const indexRouter = require("./routes/index");
 const authorRouter = require("./routes/authors");
+const bookRouter = require("./routes/books");
+
 
 
 app.set("view engine", "ejs");
@@ -25,9 +27,11 @@ app.use(express.static("public"));
 // body parser
 app.use(bodyParser.urlencoded({limit:"10mb", extended:false}));
 
-// use routes
+// all the imported routers should go to their respective routes
 app.use("/", indexRouter);
 app.use("/authors", authorRouter);
+app.use("/books", bookRouter);
+
 
 // setup mongodb
 const mongoose = require("mongoose");
