@@ -14,7 +14,8 @@ const indexRouter = require("./routes/index");
 const authorRouter = require("./routes/authors");
 const bookRouter = require("./routes/books");
 
-
+// library used to allow us to carry out the put and delete routes from the browser
+const methodOverride = require("method-override");
 
 app.set("view engine", "ejs");
 // point to the location where all the views are loacted
@@ -23,6 +24,8 @@ app.set("views", __dirname + "/views");
 app.set("layout", "layouts/layout")
 app.use(expressLayout)
 app.use(express.static("public"));
+
+app.use(methodOverride("_method"));
 
 // body parser
 app.use(bodyParser.urlencoded({limit:"10mb", extended:false}));
@@ -39,5 +42,7 @@ mongoose.connect(process.env.DATABASE_URL, {useNewUrlParser:true, useUnifiedTopo
 const db = mongoose.connection;
 db.on("error", err => console.log(err));
 db.once("open", () => console.log("Connected to mongoose")); // connection for the first time
+
+
 
 app.listen(process.env.PORT || 3000);
