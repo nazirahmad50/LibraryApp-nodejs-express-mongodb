@@ -3,22 +3,8 @@ const router = express.Router();
 const Book = require("../models/book");
 const Author = require("../models/author");
 
-// create path for the cover image
-const path = require("path")
-const fs = require("fs");
-const uploadPath = path.join("public", Book.coverImgBasePath)
 // all the different image types that we accept
-const imageMimeTypes = ["image/jpeg", "image/png", "images/gif"] 
-
-// using multer
-const multer = require("multer");
-const upload = multer({
-    dest:uploadPath,
-    fileFilter: (req, file, callback) =>{
-        callback(null, imageMimeTypes.includes(file.mimetype));
-    }
-})
-
+ const imageMimeTypes = ["image/jpeg", "image/png", "images/gif"] 
 
 // All Books
 router.get("/", async (req,res) =>{
@@ -64,29 +50,24 @@ router.get("/new", async (req,res) =>{
 })
 
 // create Book
-// the 'cover' is the name what we set for the input
-// now were telling multer that were uploading single file with the name of cover
-router.post("/", upload.single("cover"), async (req,res) =>{
 
-    // this multer library will also add a variable called file
-   const fileName = req.file != null ? req.file.filename : null;
+router.post("/", async (req,res) =>{
 
     const book = new Book({
         title: req.body.title,
         author: req.body.author,
         publishDate: new Date(req.body.publishDate),
         pageCount: req.body.pageCount,
-        coverImageName: fileName,
         description: req.body.description,
     });
+
+    saveCover(book, req.body.cover);
 
     try {
         const newBook = await book.save();
         res.redirect("books")
         
     } catch (err){
-        if (book.coverImageName != null) removeBookCover(book.coverImageName);
-
         renderNewPage(res, book, true);
     }
     
@@ -104,11 +85,18 @@ async function renderNewPage(res, book, hasError = false){
     }
 }
 
-function removeBookCover(fileName){
-    // delete the file of 'fileName' from the bookCovers folder
-    fs.unlink(path.join(uploadPath, fileName), err =>{
-        if (err) console.log(err);
-    });
+function saveCover(book, coverEncoded){
+
+    if (coverEncoded == null) return
+
+    const cover = JSON.parse(coverEncoded);
+    // check if the cover type is in the allowed image types
+    if (cover != null && imageMimeTypes.includes(cover.type)){
+        // create a buffer from some set of data
+        // second param is how we want to convert it from
+        book.coverImage = new Buffer.from(cover.data, "base64");
+        book.coverImageType = cover.type;
+    }
 }
 
 module.exports = router;

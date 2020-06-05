@@ -1,7 +1,5 @@
 const mongoose = require("mongoose");
-const path = require("path");
-// base path to where all the cover image swill be stored
-const coverImgBasePath = "uploads/bookCovers";
+
 
 // create a schema to define the db table for authors
 const bookSchema = new mongoose.Schema({
@@ -25,9 +23,14 @@ const bookSchema = new mongoose.Schema({
         required:true,
         default: Date.now
     },
-    coverImageName:{
-        type: String,
+    coverImage:{
+        type: Buffer, // buffer of the data representing the entire image
         required:true,
+    },
+    // in order to render the iamge we need to know the type of iamge it is such as png...
+    coverImageType:{
+        type: String,
+        required:true
     },
     author:{
         type: mongoose.Schema.Types.ObjectId, // references the another object inside the mongo db collection
@@ -38,12 +41,12 @@ const bookSchema = new mongoose.Schema({
 
 // the virtual will allow to derive value from any of the schema vars
 bookSchema.virtual("coverImagePath").get(function() {
-    // return the full path to 'bookCovers' folder with the 'coverImageName'
-    if (this.coverImageName != null){
-        return path.join("/", coverImgBasePath, this.coverImageName);
+    if (this.coverImage != null && this.coverImageType != null){
+
+        // the 'data' object in html allows us to take buffer data and use it as source for the iamge
+        return `data:${this.coverImageType};charset=utf-8;base64, ${this.coverImage.toString("base64")}`;
     }
 });
 
 // 'Author' will be the name of the table inside db
 module.exports = mongoose.model("Book", bookSchema);
-module.exports.coverImgBasePath = coverImgBasePath;
