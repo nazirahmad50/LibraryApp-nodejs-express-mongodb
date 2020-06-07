@@ -67,7 +67,7 @@ router.post("/", async (req,res) =>{
         res.redirect(`books/${newBook.id}`)
         
     } catch (err){
-        renderFormPage(res, "new", book, true);
+        renderFormPage(res, book, "new", true);
     }
     
 })
@@ -121,7 +121,7 @@ router.put("/:id", async (req,res) =>{
         
     } catch (err){
         if (book != null){
-            renderFormPage(res, "edit", book);
+            renderFormPage(res,book, "edit" );
         } else{
             res.redirect("/");
         }
@@ -167,7 +167,6 @@ async function renderFormPage(res, book,form, hasError = false){
         res.render(`books/${form}`, params);
         
     } catch (er) {
-        console.log(er)
         res.redirect("/books")
     }
 }
