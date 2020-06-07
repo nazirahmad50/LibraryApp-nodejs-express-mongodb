@@ -45,7 +45,7 @@ router.get("/", async (req,res) =>{
 // New Book
 router.get("/new", async (req,res) =>{
     
-    renderFormPage(res, "new", new Book());
+    renderFormPage(res,new Book(),"new");
 
 })
 
@@ -166,7 +166,8 @@ async function renderFormPage(res, book,form, hasError = false){
         }
         res.render(`books/${form}`, params);
         
-    } catch {
+    } catch (er) {
+        console.log(er)
         res.redirect("/books")
     }
 }
